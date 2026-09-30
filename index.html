@@ -1,0 +1,69 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="theme-color" content="#f5f7f3">
+  <title>PurseGuard — live tracker</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700&family=Manrope:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" integrity="sha256-p4NxAoJBhIIN+hmNHrzRCf9tD/miZyoHS5obTRR9BMY=" crossorigin="">
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+  <div class="app-shell">
+    <aside class="sidebar">
+      <a class="brand" href="#" aria-label="PurseGuard home">
+        <span class="brand-mark"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M5 8.5h14a2 2 0 0 1 2 2v8a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-8a2 2 0 0 1 2-2Z"/><path d="M7 8.5V6a2 2 0 0 1 2-2h6a2 2 0 0 1 2 2v2.5M16 13h5"/><circle cx="16" cy="13" r=".7"/></svg></span>
+        <span>Purse<span class="brand-light">Guard</span></span>
+      </a>
+      <div class="side-label">YOUR DEVICE</div>
+      <button class="device-card" id="deviceCard" type="button">
+        <span class="device-icon"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 9.5 12 4l8 5.5v10H4z"/><path d="M9 19.5v-6h6v6M8 9h.01M12 9h.01M16 9h.01"/></svg></span>
+        <span class="device-text"><strong>Everyday purse</strong><small id="deviceConnection">Not connected</small></span>
+        <span class="device-dot" id="deviceDot"></span>
+      </button>
+      <div class="side-label nav-label">OVERVIEW</div>
+      <div class="nav-item active"><span class="nav-symbol">◉</span> Live tracking <span class="nav-pill">LIVE</span></div>
+      <div class="nav-item muted"><span class="nav-symbol">◷</span> Activity history</div>
+      <div class="side-bottom">
+        <div class="tip-card"><span class="tip-spark">✳</span><strong>Quick tip</strong><p>Open this page in Android Chrome to connect to your purse over Bluetooth.</p></div>
+        <div class="profile"><span class="avatar">P</span><span><strong>Personal tracker</strong><small>ESP32 · 30-pin</small></span><span class="profile-menu">···</span></div>
+      </div>
+    </aside>
+
+    <main class="main-content">
+      <header class="topbar"><div class="breadcrumb">Devices <span>/</span> <strong>Everyday purse</strong></div><div class="top-actions"><span class="secure-label"><span class="secure-dot"></span> PRIVATE TRACKING</span><button class="icon-button" id="notificationButton" type="button" aria-label="Enable browser notifications" title="Enable browser notifications"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M18 9a6 6 0 0 0-12 0c0 7-3 7-3 9h18c0-2-3-2-3-9M10 21h4"/></svg><span class="notification-indicator" id="notificationIndicator"></span></button><span class="top-avatar">P</span></div></header>
+
+      <section class="page-heading"><div><div class="eyebrow"><span class="pulse"></span> YOUR PURSE, IN VIEW</div><h1>Live tracking</h1><p class="subtitle">Know where your purse is. Get alerted if it wanders.</p></div><div class="heading-state" id="connectionBadge"><span class="state-dot"></span><span id="connectionLabel">Waiting for device</span></div></section>
+
+      <section class="status-banner" id="alertBanner" aria-live="assertive"><span class="banner-icon">!</span><div><strong id="alertTitle">Purse is away from your phone</strong><p id="alertMessage">The purse is beyond your distance limit.</p></div><button id="dismissAlert" type="button" aria-label="Dismiss alert">×</button></section>
+
+      <div class="dashboard-grid">
+        <section class="map-panel panel">
+          <div class="panel-heading map-heading"><div><h2>Location</h2><p><span class="live-dot"></span><span id="locationStatus">Waiting for GPS signal</span></p></div><button class="map-expand" id="centerMapButton" type="button" title="Center map on purse"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 3v3m0 12v3M3 12h3m12 0h3M8 8l8 8m0-8-8 8"/></svg></button></div>
+          <div id="map" role="img" aria-label="Map showing phone and purse locations"></div>
+           <div class="map-legend"><span><i class="legend-person" aria-hidden="true">🧍</i> Person</span><span><i class="legend-purse" aria-hidden="true">👛</i> Wallet</span><span class="map-updated" id="lastUpdated">No location yet</span></div>
+        </section>
+
+        <section class="right-column">
+          <article class="distance-card panel"><div class="panel-heading"><div><h2>Distance from your phone</h2><p>GPS-based minimum separation · conservative</p></div><span class="distance-icon"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 21s7-6.1 7-12a7 7 0 1 0-14 0c0 5.9 7 12 7 12Z"/><circle cx="12" cy="9" r="2.2"/></svg></span></div><div class="distance-value"><span id="distanceValue">—</span><span class="distance-unit">m</span></div><p class="distance-accuracy" id="distanceAccuracy">Waiting for location accuracy</p><div class="distance-track"><div class="distance-track-fill" id="distanceTrackFill"></div><span class="threshold-marker" id="thresholdMarker"></span></div><div class="distance-foot"><span id="rangeState">Waiting for both locations</span><label class="threshold-setting">Alert at <input id="thresholdInput" type="number" min="1" max="500" value="10" aria-label="Alert distance in metres"> m</label></div></article>
+
+          <article class="safe-spot-card panel"><div class="panel-heading"><div><h2>Your phone location</h2><p id="phoneLocationStatus">Start location sharing to measure distance</p></div><span class="safe-icon"><svg viewBox="0 0 24 24" aria-hidden="true"><rect x="6" y="2.5" width="12" height="19" rx="2"/><path d="M10 18.5h4"/></svg></span></div><div class="safe-coordinates" id="phoneCoordinates">Waiting for phone location</div><button class="primary-button" id="startPhoneLocation" type="button">Share phone location</button></article>
+          <article class="rfid-card panel" id="rfidCard"><div class="panel-heading"><div><h2>Belongings check</h2><p id="rfidStatus">Connect PurseGuard over Bluetooth to check tags</p></div><span class="esp-chip">RFID</span></div><div class="rfid-item-list" id="rfidItemList" aria-live="polite">Waiting for RFID inventory…</div></article>
+        </section>
+      </div>
+
+      <section class="bottom-grid">
+        <article class="connection-panel panel"><div class="panel-heading"><div><h2>Connect your purse</h2><p>Find and connect to the nearby ESP32 using Bluetooth</p></div><span class="esp-chip">BLE</span></div><div class="endpoint-row"><button class="primary-button" id="connectBleButton" type="button">Connect purse via Bluetooth</button><div class="helper-row"><span id="bleStatus">Android Chrome · Bluetooth permission required</span><button class="demo-button" id="demoButton" type="button">Try demo</button></div></div></article>
+        <article class="activity-panel panel"><div class="panel-heading"><div><h2>Recent activity</h2><p>Updates from your tracker</p></div><button class="clear-button" id="clearActivityButton" type="button">Clear</button></div><div class="activity-list" id="activityList"><div class="empty-activity"><span>◎</span><p>Nothing to report yet</p><small>Location updates will show up here.</small></div></div></article>
+      </section>
+      <footer class="footer-note"><span>◎</span> Use Android Chrome over HTTPS and keep this page open. GPS distance is an estimate. <a href="#deviceConnectionInfo" id="privacyLink">How it works</a></footer>
+    </main>
+  </div>
+  <div class="toast" id="toast" role="status" aria-live="polite"></div>
+  <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js" integrity="sha256-20nQCchB9co0qIjJZRGuk2/Z9VM+kNiyxNV1lvTlZBo=" crossorigin=""></script>
+  <script src="gps.js?v=rfid-20261001-3"></script>
+</body>
+</html>
